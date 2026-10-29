@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pozuelo Talent Assessment</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Iconos Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="h-screen w-screen bg-slate-100 text-slate-800 flex flex-col overflow-hidden font-sans antialiased">
+
+  <!-- ========================================== -->
+  <!-- 1. ENCABEZADO SUPERIOR (FULLSCREEN)        -->
+  <!-- ========================================== -->
+  <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between flex-shrink-0 z-30 shadow-sm">
+    <div class="flex items-center gap-4">
+      <!-- Logo Corporativo con Respaldo -->
+      <div class="h-10 flex items-center pr-4 border-r border-slate-200">
+        <img src="assets/logo.png" alt="Logo Pozuelo" class="h-8 max-w-[140px] object-contain" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';">
+        <div id="logoFallback" class="hidden items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-black text-sm">P</div>
+          <span class="font-extrabold text-sm tracking-tight text-slate-800">POZUELO</span>
+        </div>
+      </div>
+
+      <!-- Título Oficial -->
+      <div>
+        <h1 class="text-base font-extrabold text-slate-900 tracking-tight">Pozuelo Talent Assessment</h1>
+        <p class="text-[11px] text-slate-400 font-medium">Gestión de Talento Humano • Entrevistas de Selección y Salida</p>
+      </div>
+    </div>
+
+    <!-- Perfil del Evaluador Interactivo -->
+    <div class="flex items-center gap-4">
+      <div id="btnCambiarEvaluador" class="flex items-center gap-3 pr-4 border-r border-slate-200 cursor-pointer hover:opacity-80 transition-opacity" title="Clic para cambiar de evaluador">
+        <div class="w-9 h-9 rounded-xl bg-red-50 text-red-700 border border-red-200 flex items-center justify-center font-bold text-xs shadow-inner" id="avatarEvaluador">
+          --
+        </div>
+        <div class="text-right">
+          <p class="text-xs font-bold text-slate-800 leading-tight" id="nombreEvaluador">Identifíquese aquí</p>
+          <p class="text-[10px] text-slate-400 font-medium" id="rolEvaluador">Ingresar código</p>
+        </div>
+      </div>
+
+      <button id="btnToggleCopilot" class="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:shadow cursor-pointer">
+        <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+        <span>Copilot Moni</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 2. ESPACIO DE TRABAJO PRINCIPAL            -->
+  <!-- ========================================== -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- COLUMNA IZQUIERDA: RESUMEN Y NAVEGACIÓN -->
+    <aside class="w-72 bg-white border-r border-slate-200 flex flex-col justify-between p-5 flex-shrink-0 z-10 overflow-y-auto">
+      <div class="space-y-6">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Ficha de la Sesión</span>
+          <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 space-y-2.5">
+            <div>
+              <span class="text-[10px] text-slate-400 font-medium block">Módulo Activo:</span>
+              <p class="text-xs font-bold text-slate-700 truncate" id="resumenModulo">Hub Principal</p>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-medium block">Requisición / Ref:</span>
+              <p class="text-xs font-bold text-slate-700 truncate" id="resumenRQ">Sin seleccionar</p>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-medium block">Colaborador / Candidato:</span>
+              <p class="text-xs font-bold text-slate-700 truncate" id="resumenCandidato">Por definir</p>
+            </div>
+            <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center">
+              <span class="text-[10px] text-slate-400 font-medium">Parámetro / Área:</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700 truncate max-w-[120px]" id="resumenNivel">N/A</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Etapas de Evaluación (Selección) -->
+        <div id="contenedorEtapasSeleccion" class="space-y-2 hidden">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Etapas Selección</span>
+          
+          <div id="stepNav1" class="flex items-center gap-3 p-2.5 rounded-xl bg-red-50 text-red-700 font-bold text-xs border border-red-200">
+            <div class="w-6 h-6 rounded-lg bg-red-600 text-white flex items-center justify-center text-[10px]">1</div>
+            <span>Encuadre y Datos</span>
+          </div>
+
+          <div id="stepNav2" class="flex items-center gap-3 p-2.5 rounded-xl text-slate-500 font-semibold text-xs hover:bg-slate-50 transition-all">
+            <div class="w-6 h-6 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center text-[10px]">2</div>
+            <span>Preguntas y Evidencias</span>
+          </div>
+
+          <div id="stepNav3" class="flex items-center gap-3 p-2.5 rounded-xl text-slate-500 font-semibold text-xs hover:bg-slate-50 transition-all">
+            <div class="w-6 h-6 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center text-[10px]">3</div>
+            <span>Diagnóstico Final</span>
+          </div>
+        </div>
+
+        <!-- Resumen de Clima (Entrevista de Salida) -->
+        <div id="contenedorKpiSalida" class="space-y-2 hidden">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Clima & Liderazgo</span>
+          <div class="p-4 rounded-xl bg-slate-900 text-white space-y-2 text-center">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-amber-400 block">Índice Satisfacción</span>
+            <div class="text-3xl font-black" id="kpiSatisfaccionValor">-- / 5.0</div>
+            <p class="text-[10px] text-slate-400" id="kpiSatisfaccionEtiqueta">Sin calificaciones aún</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones de Navegación Lateral -->
+      <div class="pt-4 border-t border-slate-100 space-y-2">
+        <button id="btnVolverHubGlobal" class="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all cursor-pointer">
+          <i data-lucide="home" class="w-4 h-4 text-slate-400"></i>
+          <span>Volver al Inicio</span>
+        </button>
+        <button id="btnFeedbackModal" class="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 transition-all cursor-pointer">
+          <i data-lucide="message-square" class="w-4 h-4 text-slate-400"></i>
+          <span>Retroalimentación</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- COLUMNA CENTRAL: ÁREA OPERATIVA 100% FULLSCREEN -->
+    <main class="flex-1 overflow-y-auto p-8 bg-slate-100 flex flex-col" id="contenedorPrincipal">
+
+      <!-- ========================================== -->
+      <!-- PANTALLA 0: HUB DE PROCESO                 -->
+      <!-- ========================================== -->
+      <section id="seccionHub" class="w-full max-w-4xl mx-auto flex flex-col items-center justify-center my-auto py-12 space-y-10">
+        <div class="text-center space-y-3">
+          <h2 class="text-3xl font-black text-slate-900 tracking-tight">¿Qué proceso ejecutaremos hoy?</h2>
+          <p class="text-sm text-slate-500">Seleccione el módulo de evaluación para iniciar una nueva sesión guiada.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          <!-- Tarjeta: Selección de Talento -->
+          <button id="btnModuloSeleccion" class="group bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-red-200 transition-all text-left flex flex-col justify-between h-64 relative overflow-hidden cursor-pointer">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
+            <div>
+              <div class="w-14 h-14 rounded-2xl bg-red-600 text-white flex items-center justify-center shadow-md mb-6 relative z-10">
+                <i data-lucide="user-plus" class="w-7 h-7"></i>
+              </div>
+              <h3 class="text-xl font-bold text-slate-800 relative z-10">Entrevista de Selección</h3>
+              <p class="text-xs text-slate-500 mt-2 relative z-10 leading-relaxed">Metodología STAR, encuadre institucional Pozuelo y evaluación por competencias para candidatos a nuevo ingreso o promoción interna.</p>
+            </div>
+            <div class="flex items-center text-xs font-bold text-red-600 gap-1 relative z-10 group-hover:gap-2 transition-all">
+              <span>Iniciar evaluación</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </div>
+          </button>
+
+          <!-- Tarjeta: Entrevistas de Salida -->
+          <button id="btnModuloSalida" class="group bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all text-left flex flex-col justify-between h-64 relative overflow-hidden cursor-pointer">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-slate-100 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
+            <div>
+              <div class="w-14 h-14 rounded-2xl bg-slate-700 text-white flex items-center justify-center shadow-md mb-6 relative z-10">
+                <i data-lucide="user-minus" class="w-7 h-7"></i>
+              </div>
+              <h3 class="text-xl font-bold text-slate-800 relative z-10">Entrevistas de Salida</h3>
+              <p class="text-xs text-slate-500 mt-2 relative z-10 leading-relaxed">Registro de egreso de colaboradores, motivos de desvinculación, escala de satisfacción organizacional y feedback a liderazgos.</p>
+            </div>
+            <div class="flex items-center text-xs font-bold text-slate-700 gap-1 relative z-10 group-hover:gap-2 transition-all">
+              <span>Iniciar entrevista</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================= -->
+      <!-- PANTALLA 1: PARÁMETROS Y ENCUADRE (SELECCIÓN)          -->
+      <!-- ======================================================= -->
+      <section id="seccionEncuadre" class="w-full space-y-6 hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <h2 class="text-sm font-extrabold text-slate-800 mb-4 flex items-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4 text-red-600"></i>
+            Parámetros de Selección y Posición
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Número de Requisición (RQ) *</label>
+              <select id="selectRequisicion" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none bg-white">
+                <option value="">Seleccione una vacante...</option>
+                <option value="RQ-36018 - GESTOR (A) ANALITICA DE DATOS">RQ-36018 - GESTOR (A) ANALITICA DE DATOS</option>
+                <option value="RQ-7687 - GESTOR (A) ANALITICA DE DATOS">RQ-7687 - GESTOR (A) ANALITICA DE DATOS</option>
+                <option value="RQ-36021 - AUXILIAR GESTION TALENTO">RQ-36021 - AUXILIAR GESTION TALENTO</option>
+                <option value="RQ-36040 - OPERARIO PRODUCCION I">RQ-36040 - OPERARIO PRODUCCION I</option>
+                <option value="RQ-55012 - EJECUTIVO COMERCIAL CAM">RQ-55012 - EJECUTIVO COMERCIAL CAM</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Nombre del Candidato(a) *</label>
+              <input type="text" id="inputCandidato" placeholder="Ej: John Winston Lennon" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Área de Gestión *</label>
+              <select id="selectAreaGestion" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none bg-white">
+                <option value="Operaciones">Operaciones</option>
+                <option value="Comercial">Comercial</option>
+                <option value="Soporte">Soporte / Administrativo</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Tipo de Ingreso *</label>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button type="button" data-tipo-ingreso="Nuevo ingreso" class="btn-tipo-ingreso active-selector py-2.5 px-1.5 text-[11px] font-bold rounded-xl border border-red-600 bg-red-600 text-white transition-all text-center">
+                  Nuevo ingreso
+                </button>
+                <button type="button" data-tipo-ingreso="Colaborador regular" class="btn-tipo-ingreso py-2.5 px-1.5 text-[11px] font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:border-slate-400 transition-all text-center">
+                  Colaborador regular
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Nivel Organizacional *</label>
+              <select id="selectNivelPuesto" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none bg-white">
+                <option value="operativo">Nivel 1: Operativo</option>
+                <option value="tactico">Nivel 2: Personal táctico (sin personal)</option>
+                <option value="tactico_cargo">Nivel 3: Personal táctico con personal a cargo</option>
+                <option value="estrategico">Nivel 4: Personal estratégico (Dirección)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 Pasos del Encuadre Pozuelo -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                <i data-lucide="compass" class="w-4 h-4 text-red-600"></i>
+                Guía de Apertura y Encuadre Institucional (5 Pasos Pozuelo)
+              </h2>
+              <p class="text-xs text-slate-400">Protocolo metodológico antes de formular preguntas de competencia</p>
+            </div>
+            <span class="text-[11px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600">No ponderable</span>
+          </div>
+
+          <div id="contenedorPasosEncuadre" class="grid grid-cols-1 md:grid-cols-5 gap-4"></div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button id="btnIniciarEvaluacion" class="flex items-center gap-2 px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer">
+            <span>Iniciar Evaluación de Competencias</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================= -->
+      <!-- PANTALLA 2: PREGUNTAS Y EVIDENCIAS STAR (SELECCIÓN)     -->
+      <!-- ======================================================= -->
+      <section id="seccionEvaluacion" class="w-full space-y-6 hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <span id="badgeCandidatoActivo" class="font-bold text-slate-800">Candidato</span>
+              <span>•</span>
+              <span id="badgeNivelActivo" class="text-red-600 font-bold uppercase tracking-wider text-[10px]">Nivel</span>
+            </div>
+            <h2 class="text-base font-extrabold text-slate-900 mt-1" id="tituloBloqueEvaluacion">Evaluación de Competencias Clave</h2>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Progreso Total</span>
+            <p class="text-base font-black text-red-600" id="indicadorProgreso">Tarjetas activas</p>
+          </div>
+        </div>
+
+        <div id="contenedorPreguntasActivas" class="space-y-6"></div>
+
+        <!-- Pregunta Adicional -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide">¿Desea formular una pregunta complementaria?</h3>
+              <p class="text-xs text-slate-400">Habilite este bloque si requiere profundizar en una experiencia no cubierta en las tarjetas anteriores.</p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" id="btnPreguntaAdicionalNo" class="px-4 py-2 text-xs font-bold rounded-xl border border-red-600 bg-red-600 text-white transition-all cursor-pointer">NO</button>
+              <button type="button" id="btnPreguntaAdicionalSi" class="px-4 py-2 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:border-slate-400 transition-all cursor-pointer">SÍ</button>
+            </div>
+          </div>
+
+          <div id="camposPreguntaAdicional" class="space-y-4 hidden pt-4 border-t border-slate-100">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Redacte la pregunta formulada al candidato</label>
+              <input type="text" id="inputTextoPreguntaAdicional" placeholder="Describa el desafío o situación específica evaluada..." class="w-full text-xs font-medium border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Evaluación del cumplimiento</label>
+                <select id="selectCumplimientoAdicional" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 bg-white">
+                  <option value="1.25">Cumple y supera (1.25)</option>
+                  <option value="1.00" selected>Cumple con lo esperado (1.00)</option>
+                  <option value="0.50">Cumple parcialmente (0.50)</option>
+                  <option value="0.00">No cumple (0.00)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Notas de respuesta y evidencias</label>
+                <input type="text" id="inputComentarioAdicional" placeholder="Evidencias registradas..." class="w-full text-xs font-medium border border-slate-300 rounded-xl p-3">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button id="btnVolverEncuadre" class="flex items-center gap-2 px-6 py-3 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Volver a Parámetros</span>
+          </button>
+
+          <button id="btnCalcularResultado" class="flex items-center gap-2 px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer">
+            <span>Finalizar y Generar Diagnóstico</span>
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================= -->
+      <!-- PANTALLA 3: DIAGNÓSTICO FINAL (SELECCIÓN)               -->
+      <!-- ======================================================= -->
+      <section id="seccionResultado" class="w-full max-w-4xl mx-auto space-y-6 hidden">
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-10 text-center space-y-6">
+          <div class="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto shadow-inner">
+            <i data-lucide="award" class="w-8 h-8"></i>
+          </div>
+
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Puntaje Global Ponderado</span>
+            <h2 class="text-7xl font-black text-slate-900 mt-2 tracking-tight" id="valorNotaFinal">0</h2>
+            <p class="text-xs text-slate-400 mt-1 font-medium">Escala oficial de evaluación institucional Pozuelo (0 a 100)</p>
+          </div>
+
+          <div class="inline-block px-6 py-2 rounded-xl text-xs font-black tracking-widest uppercase shadow-sm" id="badgeClasificacion">
+            SOBRESALIENTE
+          </div>
+
+          <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 text-left space-y-2 max-w-2xl mx-auto">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Diagnóstico para la Terna del Líder:</span>
+            <p class="text-sm font-bold text-slate-800 leading-relaxed" id="textoRecomendacionFinal">
+              Candidato con potencial. Se recomienda su inclusión en la terna y continuidad en el proceso.
+            </p>
+          </div>
+
+          <div class="flex items-center justify-center gap-4 pt-4 border-t border-slate-100">
+            <button id="btnReiniciarEntrevista" class="px-6 py-3 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer">
+              Nueva Evaluación
+            </button>
+            <button id="btnGuardarRegistro" class="flex items-center gap-2 px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow hover:shadow-md transition-all cursor-pointer">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Guardar en Base de Datos</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================= -->
+      <!-- PANTALLA 4: ENTREVISTAS DE SALIDA                       -->
+      <!-- ======================================================= -->
+      <section id="seccionSalida" class="w-full max-w-5xl mx-auto space-y-6 hidden">
+        
+        <!-- Encabezado del Módulo -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center font-bold">
+              <i data-lucide="user-minus" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-slate-900">Entrevista de Salida y Desvinculación</h2>
+              <p class="text-xs text-slate-400">Diagnóstico de clima laboral, motivos de egreso y retroalimentación institucional</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-slate-100 text-slate-600">Gestión Humana</span>
+        </div>
+
+        <!-- 1. Ficha del Colaborador -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+          <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider flex items-center gap-2">
+            <i data-lucide="id-card" class="w-4 h-4 text-red-600"></i>
+            1. Ficha del Colaborador y Causa de Egreso
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-slate-600 mb-1">Nombre de la Compañía *</label>
+              <select id="salidaCompania" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 bg-white focus:ring-2 focus:ring-red-500">
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Cédula de Identidad *</label>
+              <input type="text" id="salidaCedula" placeholder="Ej: 1-1580-0421" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Completo del Colaborador *</label>
+              <input type="text" id="salidaNombreColaborador" placeholder="Nombre y apellidos..." class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Último Cargo Desempeñado *</label>
+              <input type="text" id="salidaUltimoCargo" placeholder="Ej: Operario de Producción" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Nombre de la Última Jefatura *</label>
+              <input type="text" id="salidaUltimaJefatura" placeholder="Nombre del líder directo..." class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Antigüedad en la Compañía *</label>
+              <select id="salidaAntiguedadEmpresa" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 bg-white focus:ring-2 focus:ring-red-500">
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Antigüedad en el Último Puesto *</label>
+              <select id="salidaAntiguedadPuesto" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 bg-white focus:ring-2 focus:ring-red-500">
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Motivo Principal de Salida *</label>
+              <select id="salidaMotivo" class="w-full text-xs font-semibold border border-slate-300 rounded-xl p-3 bg-white focus:ring-2 focus:ring-red-500">
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Fortalezas y Experiencias -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                <i data-lucide="thumbs-up" class="w-4 h-4 text-emerald-600"></i>
+                2. Aspectos Positivos y Experiencias Clave
+              </h3>
+              <p class="text-xs text-slate-500 mt-1">Seleccione exactamente 3 fortalezas o buenas prácticas que el colaborador reconoce en la organización.</p>
+            </div>
+            <span class="text-xs font-black px-3 py-1 rounded-xl bg-slate-100 text-slate-700" id="contadorFortalezas">0 / 3 seleccionadas</span>
+          </div>
+
+          <div id="contenedorChipsFortalezas" class="flex flex-wrap gap-2 pt-2"></div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-100">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Experiencia positiva memorable ("que tocara el corazón") *</label>
+              <textarea id="salidaExpPositiva" rows="3" placeholder="Anécdota o momento significativo positivo..." class="w-full text-xs border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Experiencia negativa, desmotivante o dolorosa *</label>
+              <textarea id="salidaExpNegativa" rows="3" placeholder="Situación difícil o aspecto que motivó su salida..." class="w-full text-xs border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Matriz Cuantitativa 1 a 5 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 text-amber-500"></i>
+                3. Matriz de Satisfacción Organizacional (Escala 1 a 5)
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Siendo 5 la calificación más alta y 1 la menor calificación posible.</p>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Promedio General</span>
+              <p class="text-base font-black text-slate-900" id="promedioMatrizSalida">-- / 5.0</p>
+            </div>
+          </div>
+
+          <div id="contenedorMatrizSalida" class="space-y-3"></div>
+        </div>
+
+        <!-- 4. Feedback al Líder y Cierre -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+          <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider flex items-center gap-2">
+            <i data-lucide="message-circle" class="w-4 h-4 text-blue-600"></i>
+            4. Retroalimentación Directa y eNPS Institucional
+          </h3>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">¿Qué retroalimentación le brindaría a su líder inmediato para fortalecer su gestión? *</label>
+              <textarea id="salidaFeedbackLider" rows="2" placeholder="Comentarios constructivos hacia su jefatura..." class="w-full text-xs border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-2">¿Cumplió este trabajo con sus expectativas? *</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <button type="button" data-val="Sí" class="btn-salida-expectativa py-2.5 px-3 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:border-slate-400 transition-all text-center">Sí</button>
+                  <button type="button" data-val="No" class="btn-salida-expectativa py-2.5 px-3 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:border-slate-400 transition-all text-center">No</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-2">¿Recomendaría a Pozuelo como lugar de trabajo? (eNPS) *</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" data-val="Sí" class="btn-salida-enps py-2.5 px-2 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:border-slate-400 transition-all text-center">Sí</button>
+                  <button type="button" data-val="No" class="btn-salida-enps py-2.5 px-2 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:border-slate-400 transition-all text-center">No</button>
+                  <button type="button" data-val="No sé" class="btn-salida-enps py-2.5 px-2 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:border-slate-400 transition-all text-center">No sé</button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Sugerencia para hacer de esta Compañía un mejor lugar para trabajar *</label>
+              <textarea id="salidaSugerenciaMejora" rows="2" placeholder="Recomendaciones para bienestar, cultura o procesos..." class="w-full text-xs border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Observaciones confidenciales del entrevistador (Gestión Humana) *</label>
+              <textarea id="salidaNotasEntrevistador" rows="2" placeholder="Conclusiones del generalista, riesgos de clima o puntos de atención..." class="w-full text-xs border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 bg-slate-50"></textarea>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+            <button id="btnCancelarSalida" class="px-6 py-3 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer">
+              Cancelar y Salir
+            </button>
+            <button id="btnGuardarSalida" class="flex items-center gap-2 px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              <span>Guardar Entrevista de Salida</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ======================================================= -->
+    <!-- 3. COPILOT MONI (DRAWER FLOTANTE SUPERPUESTO)           -->
+    <!-- ======================================================= -->
+    <aside id="copilotDrawer" class="fixed right-0 top-0 bottom-0 w-96 bg-white border-l border-slate-200 shadow-2xl flex flex-col z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+      <div class="h-16 border-b border-slate-200 px-5 flex items-center justify-between bg-slate-50 flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center shadow-sm">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-xs font-black text-slate-900 tracking-tight">Copilot Moni</h3>
+            <p class="text-[10px] text-slate-400 font-medium">Asistencia Metodológica & Legal</p>
+          </div>
+        </div>
+        <button id="btnCerrarCopilot" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200/60 transition-all cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-5 space-y-5">
+        <div class="bg-amber-50 rounded-2xl border border-amber-200/90 p-4 space-y-2 transition-all" id="alertaArticulo404Contenedor">
+          <div class="flex items-center gap-2 text-amber-900 font-extrabold text-xs">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
+            <span>Blindaje Legal (Art. 404)</span>
+          </div>
+          <p class="text-[11px] text-amber-800 leading-relaxed" id="alertaArticulo404Texto">
+            Monitoreo activo: Evite formular o registrar preguntas sobre estado civil, familia, salud, deudas, edad o sindicatos.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Indagación STAR Clave</span>
+          
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <span class="text-[10px] font-extrabold text-red-700 uppercase block">Acción Personal</span>
+            <p class="text-xs text-slate-600 italic leading-relaxed">"¿Cuál fue su rol directo y qué hizo usted personalmente (no el equipo)?"</p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <span class="text-[10px] font-extrabold text-red-700 uppercase block">Resultado Medible</span>
+            <p class="text-xs text-slate-600 italic leading-relaxed">"¿Qué indicador cambió gracias a su decisión y qué aprendizaje le dejó?"</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-900 text-white space-y-2">
+          <span class="text-[9px] uppercase font-bold tracking-wider text-amber-400 block">Criterio Institucional</span>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Las entrevistas de salida son estrictamente confidenciales y sirven de insumo estratégico para la retención del talento.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- MODAL DE FEEDBACK -->
+  <div id="modalFeedback" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-800">Buzón de Retroalimentación</h3>
+        <button id="btnCerrarModalFeedback" class="text-slate-400 hover:text-slate-600 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <p class="text-xs text-slate-500">Envíe sus sugerencias de mejora o reporte cualquier incidencia técnica.</p>
+      <textarea id="textoFeedback" rows="4" placeholder="Escriba su mensaje aquí..." class="w-full text-xs border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
+      <div class="flex justify-end gap-2">
+        <button id="btnEnviarFeedback" class="px-5 py-2.5 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition-all cursor-pointer">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE IDENTIFICACIÓN DE EVALUADOR -->
+  <div id="modalLoginEvaluador" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-sm p-6 space-y-5 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="user-check" class="w-6 h-6"></i>
+      </div>
+
+      <div>
+        <h3 class="text-base font-extrabold text-slate-900">Identificación de Evaluador</h3>
+        <p class="text-xs text-slate-400 mt-1">Ingrese su código de colaborador para personalizar la sesión de evaluación.</p>
+      </div>
+
+      <div class="space-y-2">
+        <input type="text" id="inputCodigoEvaluador" maxlength="6" placeholder="Ej: 5677 o 5658" 
+          class="w-full text-center text-lg font-black tracking-widest border border-slate-300 rounded-2xl p-3 focus:ring-2 focus:ring-red-500 focus:outline-none uppercase bg-slate-50">
+        <p id="errorLoginEvaluador" class="text-[11px] font-bold text-rose-600 hidden">Código no reconocido en el directorio.</p>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button id="btnConfirmarCodigo" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer">
+          Ingresar al Sistema
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Scripts -->
+  <script src="bancoDatos.js"></script>
+  <script src="app.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

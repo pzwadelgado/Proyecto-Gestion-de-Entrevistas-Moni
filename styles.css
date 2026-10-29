@@ -1,0 +1,76 @@
+/**
+ * Herramienta para Entrevistas Moni - Pozuelo
+ * Archivo: styles.css
+ * Microinteracciones, transiciones fluidas y personalización de controles.
+ */
+
+/* Scrollbar refinado */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Transición suave para el drawer lateral de Copilot */
+#copilotDrawer {
+  will-change: transform;
+}
+
+/* Animación de entrada de tarjetas de preguntas */
+.card-pregunta-anim {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Selector activo para Tipo de Ingreso */
+.btn-tipo-ingreso.active-selector {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+}
+
+/* Badge de dictamen final con estilos dinámicos */
+.dictamen-sobresaliente {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+.dictamen-optimo {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+.dictamen-adecuado {
+  background-color: #fefce8;
+  color: #854d0e;
+  border: 1px solid #fef08a;
+}
+.dictamen-reservas {
+  background-color: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+.dictamen-baja {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
